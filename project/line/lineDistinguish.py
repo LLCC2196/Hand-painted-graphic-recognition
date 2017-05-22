@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('line4.jpeg',0)
+img = cv2.imread('line3-1000.jpeg',0)
 #sort the lines(horizon,vertical,left diagonal,right diagonal)
 def lines_sort(degree,tolerance_h = 10,tolerance_v = 10,
 		tolerance_l = 10,tolerance_r = 10):
