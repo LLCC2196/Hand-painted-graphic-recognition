@@ -1,0 +1,144 @@
+#Created on: May 23, 2017
+#Author: chen
+#llcc2196@gmail.com
+import cv2
+import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib import pyplot as plt
+import math
+
+#sort the lines(horizon,vertical,left diagonal,right diagonal)
+def lines_sort(degree,tolerance_h = 10,tolerance_v = 10,
+		tolerance_l = 10,tolerance_r = 10):
+	print('degree:%.3f'%degree)
+	if(((90 - tolerance_h) <= degree and degree <= 90) or
+	   (-90 <= degree and degree <= (-90 + tolerance_h))):
+		linesort = 'vertical'
+		bias = abs(abs(degree) - 90)
+	elif((0 - tolerance_h) <= degree and degree <= (0 + tolerance_h)): 
+		linesort = 'horizon'
+		bias = abs(degree)
+	elif((-45 - tolerance_h) <= degree and degree <= (-45 + tolerance_h)):
+		linesort = 'right diagonal'
+		bias = abs(abs(degree) - 45)
+	elif((45 - tolerance_h) <= degree and degree <= (45 + tolerance_h)):
+		linesort = 'left diagonal'
+		bias = abs(abs(degree) - 45)
+	else: 
+		linesort = 'incorrect'
+		bias = abs(abs(degree) - 45)
+	print('Type:',linesort)
+	print('bias:%.3f'%bias)
+	return linesort,bias	
+
+#cutoff should equal to the width of line
+def lineContours(img,cutoff = 5):
+	ret, binary = cv2.threshold(img,127,255,0) 
+	img2, contours, hierarchy = cv2.findContours			(binary,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE) 
+#If you pass cv2.CHAIN_APPROX_NONE, all the boundary points are stored.
+	for i in range(1,len(contours)):
+		linecontours = np.vstack(contours[i]).squeeze()
+		if len(linecontours) % 2 != 0:
+			linecontours = linecontours[:-1]
+		contour = np.vsplit(linecontours, 2) 
+		if(i == 1):
+			con = contour[0][cutoff:-cutoff]
+		else:
+			con = np.vstack((contour[0][cutoff:-cutoff],con))
+	return con,len(contours)
+
+def lineContinuity(contournumber):
+	return 1/(contournumber-1)
+	
+def lineSmooth(ddline,threshold = 60):
+	aveddline = np.array(ddline)
+	smooth = [elem for elem in aveddline if elem < threshold]
+	smooth = [elem for elem in aveddline if elem > -threshold]
+	return np.var(smooth)
+
+#img should be the image only have one approximate line
+#tolerance_* is the degree bias(0~45) of the line compared to the correct line
+#_h-horizon _v-vertical _l-left diagonal r-right diagonal
+def lineDistinguish(img,tolerance_h = 10,tolerance_v = 10,
+		   tolerance_l = 10,tolerance_r = 10):
+	cnt,connum = lineContours(img)
+
+	[vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_HUBER,0,0.01,0.01)
+	line_radian = math.atan(vy/vx)
+	line_degree = line_radian / math.pi * 180
+	return (lines_sort(line_degree,tolerance_h,tolerance_v,
+			tolerance_l,tolerance_r))
+
+'''
+	#show image with fitline
+	rows,cols = img.shape[:2]
+	lefty = int((-x*vy/vx) + y)
+	righty = int(((cols-x)*vy/vx)+y)
+	cv2.line(img,(cols-1,righty),(0,lefty),(0,255,0),2)
+	cv2.imshow('Image',img)
+	cv2.waitKey(0)
+'''
+
+def lineSize(contour,suitable = 0.65,x_axis = 1000,y_axis = 1000):
+	lineType,bias = lineDistinguish(img)
+	if lineType == 'vertical':
+		return len(contour)/(suitable*y_axis)
+	elif lineType == 'horizon':
+		return len(contour)/(suitable*x_axis)
+	else :
+		return len(contour)/(suitable*((x_axis**2+y_axis**2)**0.5))
+
+def derivative(point1,point2):
+	dpoint = float((point2[1] - point1[1]) / (point2[0] - point1[0])) 
+	if math.isinf(dpoint) :
+		dpoint = 50
+	return dpoint
+
+def lineDerivative(line,step=1,averstep=1):
+	dline = []
+	for i in range(0,len(line)-averstep,step):
+		dline.append(derivative(line[i],line[i + averstep]))
+	return dline	
+
+def lineCurvature(dline,step=1,averstep=1):
+	ddline = []
+	for i in range(0,len(dline)-averstep,step):
+		ddline.append(dline[i+averstep] - dline[i])
+	return ddline	
+
+#plot the line properties(original image,line,derivative of line,curvature of line),x_axis,y_axis is image size
+def plotLineproperties(img,contour,dline,ddline,amplitude = 10,x_axis = 1000,y_axis = 1000):
+
+	plt.subplot(2,2,1),plt.title('original image')
+	plt.imshow(img)
+
+	x = contour[:,0]
+	y = contour[:,1]
+	plt.subplot(2,2,2),plt.title('contour points')
+	plt.plot(x,y),plt.axis([0, x_axis, 0, y_axis])
+	
+	td = np.arange(0, len(dline))
+	plt.subplot(2,2,3),plt.plot(td,dline),plt.title('contour derivative'),plt.axis([0, len(dline), -amplitude, amplitude])
+
+	tdd = np.arange(0, len(ddline))
+	plt.subplot(2,2,4),plt.plot(tdd,ddline),plt.title('contour curvature'),plt.axis([0, len(ddline), -amplitude, amplitude])
+	plt.show()
+	return 0
+
+
+img = cv2.imread('line5-1000.jpeg',0)
+imgori = cv2.imread('line5-1000.jpeg')
+contour,connum = lineContours(img)
+print("line size:%.3f"%lineSize(contour))
+print("continuity:%.3f"%lineContinuity(connum))
+dline = lineDerivative(contour,1,10)
+ddline = lineCurvature(dline)
+print("smooth:%.3f"%lineSmooth(ddline))
+plotLineproperties(imgori,contour,dline,ddline,60)
+
+
+
+#cv2.waitKey(0)
+
+
