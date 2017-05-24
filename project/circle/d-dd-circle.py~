@@ -12,7 +12,7 @@ def lineContours(img):
 	ret, binary = cv2.threshold(img,127,255,0) 
 	img2, contours, hierarchy = cv2.findContours			(binary,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE) 
 #If you pass cv2.CHAIN_APPROX_NONE, all the boundary points are stored.
-	linecontours = np.vstack(contours[1]).squeeze()
+	linecontours = np.vstack(contours[2]).squeeze()
 	'''
 	if len(linecontours) % 2 != 0:
 		linecontours = linecontours[:-1]

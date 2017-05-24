@@ -54,7 +54,7 @@ def plotLineproperties(img,contour,dline,ddline,amplitude = 10,x_axis = 400,y_ax
 	plt.show()
 	return 0
 
-img = cv2.imread('line3-1000.jpeg',0)
+img = cv2.imread('line-1000.jpeg',0)
 imgori = cv2.imread('line3-1000.jpeg')
 contour = lineContours(img)
 dline = lineDerivative(contour,1,10)

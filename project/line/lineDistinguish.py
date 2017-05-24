@@ -5,7 +5,22 @@ import cv2
 import numpy as np
 import math
 
-img = cv2.imread('line3-1000.jpeg',0)
+
+#cutoff should equal to the width of line
+def lineContours(img,cutoff = 5):
+	ret, binary = cv2.threshold(img,127,255,0) 
+	img2, contours, hierarchy = cv2.findContours			(binary,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE) 
+#If you pass cv2.CHAIN_APPROX_NONE, all the boundary points are stored.
+	for i in range(1,len(contours)):
+		linecontours = np.vstack(contours[i]).squeeze()
+		if len(linecontours) % 2 != 0:
+			linecontours = linecontours[:-1]
+		contour = np.vsplit(linecontours, 2) 
+		if(i == 1):
+			con = contour[0][cutoff:-cutoff]
+		else:
+			con = np.vstack((contour[0][cutoff:-cutoff],con))
+	return con,len(contours)
 #sort the lines(horizon,vertical,left diagonal,right diagonal)
 def lines_sort(degree,tolerance_h = 10,tolerance_v = 10,
 		tolerance_l = 10,tolerance_r = 10):
@@ -27,9 +42,7 @@ def lines_sort(degree,tolerance_h = 10,tolerance_v = 10,
 #_h-horizon _v-vertical _l-left diagonal r-right diagonal
 def lineDistinguish(img,tolerance_h = 10,tolerance_v = 10,
 		   tolerance_l = 10,tolerance_r = 10):
-	ret,thresh = cv2.threshold(img,127,255,0)
-	im2,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-	cnt = contours[0]
+	cnt,cntnum = lineContours(img)
 
 	[vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_HUBER,0,0.01,0.01)
 	line_radian = math.atan(vy/vx)
@@ -41,7 +54,15 @@ def lineDistinguish(img,tolerance_h = 10,tolerance_v = 10,
 	lefty = int((-x*vy/vx) + y)
 	righty = int(((cols-x)*vy/vx)+y)
 	cv2.line(img,(cols-1,righty),(0,lefty),(0,255,0),2)
-	cv2.imshow("Image", img)
+	cv2.imshow('Image',img)
 	cv2.waitKey(0)
 
-lineDistinguish(img)
+img1 = cv2.imread('line4-1000.jpeg',0)
+img2 = cv2.imread('line5-1000.jpeg',0)
+img3 = cv2.imread('line6-1000.jpeg',0)
+img4 = cv2.imread('line7-1000.jpeg',0)
+lineDistinguish(img1)
+lineDistinguish(img2)
+lineDistinguish(img3)
+lineDistinguish(img4)
+
