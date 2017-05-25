@@ -17,15 +17,15 @@ def lineContours(img):
 img1 = cv2.imread('circle2-1000.jpeg',0)
 img2 = cv2.imread('circle3-1000.jpeg',0)
 img3 = cv2.imread('circle4-1000.jpeg',0)
-img4 = cv2.imread('circle5-1000.jpeg',0)
+img4 = cv2.imread('circle6-1000.jpeg',0)
 
 ret, thresh = cv2.threshold(img1, 127, 255,0)
 ret, thresh2 = cv2.threshold(img2, 127, 255,0)
 
 cnt1 = lineContours(img1)
 cnt2 = lineContours(img2)
-cnt3 = lineContours(img1)
-cnt4 = lineContours(img2)
+cnt3 = lineContours(img3)
+cnt4 = lineContours(img4)
 
 ret1 = cv2.matchShapes(cnt1,cnt2,1,0.0)
 ret2 = cv2.matchShapes(cnt1,cnt3,1,0.0)

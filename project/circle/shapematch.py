@@ -17,7 +17,7 @@ def lineContours(img):
 img1 = cv2.imread('circle2-1000.jpeg',0)
 img2 = cv2.imread('circle3-1000.jpeg',0)
 img3 = cv2.imread('circle4-1000.jpeg',0)
-img4 = cv2.imread('circle5-1000.jpeg',0)
+img4 = cv2.imread('circle6-1000.jpeg',0)
 
 ret, thresh = cv2.threshold(img1, 127, 255,0)
 ret, thresh2 = cv2.threshold(img2, 127, 255,0)
