@@ -1,0 +1,2 @@
+name:anonymous,gender:None,age:0,medicalhistory:None,imagelabel:Circle,drawtime:4,undocount:0,redocount:0,clearcount:0,device:computer,ip:211.103.21.69
+,Sort:right diagonal,Bias:1.5193161945690363,Size:0.4362304911627778,Continuity:0.1111111111111111,Smooth:15.2103906754,END
