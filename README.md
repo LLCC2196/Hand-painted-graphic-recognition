@@ -12,6 +12,10 @@ pip install package eg. ~$ sudo python3.4 -m pip install PACKAGENAME
 If matplotlib.show() can't work well follow this:
 http://www.jianshu.com/p/3f4b89aaf057
 
+The recent algorithm :
+run in a ubuntu terminal:
+xxx/project/line$: python3.4 recognition.py -i ./image/ -l ./image/ -o ./image/ -n 32.212.54.126_qwer_Line_2017-05-19-09-18-33_6786.jpeg -c batchoutput.csv
+for test
 
 ## [Anaconda Environment](doc/configure_via_anaconda.md)
 
